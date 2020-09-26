@@ -1,6 +1,6 @@
 # RealtimeStereo
 
-Attention-Aware Feature Aggregation forReal-time Stereo Matching on Edge Devices
+Attention-Aware Feature Aggregation for Real-time Stereo Matching on Edge Devices
 
 ACCV 2020
 
