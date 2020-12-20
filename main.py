@@ -141,7 +141,7 @@ def test(imgL,imgR,disp_true):
         return loss.data.cpu()
 
 def adjust_learning_rate(optimizer, epoch):
-    lr = 0.001
+    lr = 0.0005
     print(lr)
     for param_group in optimizer.param_groups:
         param_group['lr'] = lr
