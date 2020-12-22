@@ -69,7 +69,7 @@ if args.loadmodel is not None:
 
 print('Number of model parameters: {}'.format(sum([p.data.nelement() for p in model.parameters()])))
 
-optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999))
+optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), weight_decay=1e-4)
 
 def train(imgL,imgR, disp_L):
         model.train()
@@ -88,7 +88,7 @@ def train(imgL,imgR, disp_L):
             output1 = torch.squeeze(output1,1)
             output2 = torch.squeeze(output2,1)
             output3 = torch.squeeze(output3,1)
-            loss = 0.5*F.smooth_l1_loss(output1[mask], disp_true[mask], size_average=True) + 0.7*F.smooth_l1_loss(output2[mask], disp_true[mask], size_average=True) + F.smooth_l1_loss(output3[mask], disp_true[mask], size_average=True) 
+            loss = 0.25*F.smooth_l1_loss(output1[mask], disp_true[mask], size_average=True) + 0.5*F.smooth_l1_loss(output2[mask], disp_true[mask], size_average=True) + F.smooth_l1_loss(output3[mask], disp_true[mask], size_average=True) 
         elif args.model == 'basic':
             output = model(imgL,imgR)
             output = torch.squeeze(output,1)
