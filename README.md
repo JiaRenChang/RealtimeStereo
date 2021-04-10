@@ -25,3 +25,7 @@ python main.py --maxdisp 192 \
                --loadmodel (optional)\
                --savemodel (path for saving model)
 ```
+
+### Pretrained Model
+
+KITTI 2015 Pretrained Model [Google Drive](https://drive.google.com/file/d/12EQKjntE_Vi6m9vpSzJRtuzDCRJRmYoV/view?usp=sharing)
