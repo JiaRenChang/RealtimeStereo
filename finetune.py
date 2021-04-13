@@ -63,13 +63,16 @@ TestImgLoader = torch.utils.data.DataLoader(
 
 if args.model == 'stackhourglass':
     model = stackhourglass(args.maxdisp)
+    model = nn.DataParallel(model)
 elif args.model == 'basic':
     model = basic(args.maxdisp)
+    model = nn.DataParallel(model)    
+elif args.model == 'RTStereoNet':
+    model = RTStereoNet(args.maxdisp)
 else:
     print('no model')
 
 if args.cuda:
-    model = nn.DataParallel(model)
     model.cuda()
 
 if args.loadmodel is not None:

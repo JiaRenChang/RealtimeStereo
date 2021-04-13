@@ -56,7 +56,7 @@ if args.cuda:
     model.cuda()
 
 if args.loadmodel is not None:
-    print('load PSMNet')
+    print('load model')
     state_dict = torch.load(args.loadmodel)
     model.load_state_dict(state_dict['state_dict'])
 
