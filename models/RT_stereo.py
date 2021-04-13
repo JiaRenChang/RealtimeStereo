@@ -90,7 +90,7 @@ class feature_extraction(nn.Module):
 				                    nn.Conv2d(20, 20, 1, 1, 0, bias=False),
                                     convbn(20, 20, 3, 1, 1, 1,20)) #1/16
                 
-        self.attention = nn.Sequential(nn.ReLU(),
+        self.stage4 = nn.Sequential(nn.ReLU(),
                                     nn.AdaptiveAvgPool2d(1),
                                     nn.Conv2d(20, 10, 1, 1, 0, bias=True),
                                     nn.ReLU(),
@@ -106,7 +106,7 @@ class feature_extraction(nn.Module):
         out_s1 = self.firstconv(x)
         out_s2 = self.stage2(out_s1) 
         out_s3 = self.stage3(out_s2)        
-        attention = self.attention(out_s3)        
+        attention = self.stage4(out_s3)        
         out_s1, out_s2, out_s3 = self.fusion(out_s1, out_s2, out_s3, attention)          
         return [out_s3, out_s2, out_s1]
 

@@ -43,13 +43,17 @@ if args.cuda:
 
 if args.model == 'stackhourglass':
     model = stackhourglass(args.maxdisp)
+    model = nn.DataParallel(model)
 elif args.model == 'basic':
     model = basic(args.maxdisp)
+    model = nn.DataParallel(model)    
+elif args.model == 'RTStereoNet':
+    model = RTStereoNet(args.maxdisp)
 else:
     print('no model')
 
-model = nn.DataParallel(model, device_ids=[0])
-model.cuda()
+if args.cuda:
+    model.cuda()
 
 if args.loadmodel is not None:
     print('load PSMNet')

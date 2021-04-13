@@ -18,7 +18,7 @@ import time
 import math
 from dataloader import KITTIloader2015 as ls
 from dataloader import KITTILoader as DA
-
+import copy
 from models import *
 
 parser = argparse.ArgumentParser(description='PSMNet')
@@ -125,13 +125,13 @@ def test(imgL,imgR,disp_true):
         pred_disp = output3.data.cpu()
 
         #computing 3-px error#
-        true_disp = disp_true
+        true_disp = copy.deepcopy(disp_true)
         index = np.argwhere(true_disp>0)
         disp_true[index[0][:], index[1][:], index[2][:]] = np.abs(true_disp[index[0][:], index[1][:], index[2][:]]-pred_disp[index[0][:], index[1][:], index[2][:]])
         correct = (disp_true[index[0][:], index[1][:], index[2][:]] < 3)|(disp_true[index[0][:], index[1][:], index[2][:]] < true_disp[index[0][:], index[1][:], index[2][:]]*0.05)      
         torch.cuda.empty_cache()
 
-        return 1-(float(torch.sum(correct))/float(len(index[0])))
+        return (float(torch.sum(correct))/float(len(index[0])))
 
 def adjust_learning_rate(optimizer, epoch):
     if epoch <= 200:
@@ -144,50 +144,50 @@ def adjust_learning_rate(optimizer, epoch):
 
 
 def main():
-	max_acc=0
-	max_epo=0
-	start_full_time = time.time()
+    max_acc=0
+    max_epo=0
+    start_full_time = time.time()
 
-	for epoch in range(1, args.epochs+1):
-	   total_train_loss = 0
-	   total_test_loss = 0
-	   adjust_learning_rate(optimizer,epoch)
-           
-               ## training ##
-           for batch_idx, (imgL_crop, imgR_crop, disp_crop_L) in enumerate(TrainImgLoader):
-               start_time = time.time() 
+    for epoch in range(1, args.epochs+1):
+        total_train_loss = 0
+        total_test_loss = 0
+        adjust_learning_rate(optimizer,epoch)
+        
+            ## training ##
+        for batch_idx, (imgL_crop, imgR_crop, disp_crop_L) in enumerate(TrainImgLoader):
+            start_time = time.time() 
 
-               loss = train(imgL_crop,imgR_crop, disp_crop_L)
-	       print('Iter %d training loss = %.3f , time = %.2f' %(batch_idx, loss, time.time() - start_time))
-	       total_train_loss += loss
-	   print('epoch %d total training loss = %.3f' %(epoch, total_train_loss/len(TrainImgLoader)))
-	   
-               ## Test ##
+            loss = train(imgL_crop,imgR_crop, disp_crop_L)
+        print('Iter %d training loss = %.3f , time = %.2f' %(batch_idx, loss, time.time() - start_time))
+        total_train_loss += loss
+    print('epoch %d total training loss = %.3f' %(epoch, total_train_loss/len(TrainImgLoader)))
+    
+            ## Test ##
 
-           for batch_idx, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
-               test_loss = test(imgL,imgR, disp_L)
-               print('Iter %d 3-px error in val = %.3f' %(batch_idx, test_loss*100))
-               total_test_loss += test_loss
+    for batch_idx, (imgL, imgR, disp_L) in enumerate(TestImgLoader):
+        test_loss = test(imgL,imgR, disp_L)
+        print('Iter %d 3-px Accuracy in val = %.3f' %(batch_idx, test_loss*100))
+        total_test_loss += test_loss
 
 
-	   print('epoch %d total 3-px error in val = %.3f' %(epoch, total_test_loss/len(TestImgLoader)*100))
-	   if total_test_loss/len(TestImgLoader)*100 > max_acc:
-		max_acc = total_test_loss/len(TestImgLoader)*100
-		max_epo = epoch
-	   print('MAX epoch %d total test error = %.3f' %(max_epo, max_acc))
+    print('epoch %d total 3-px Accuracy in val = %.3f' %(epoch, total_test_loss/len(TestImgLoader)*100))
+    if total_test_loss/len(TestImgLoader)*100 > max_acc:
+        max_acc = total_test_loss/len(TestImgLoader)*100
+        max_epo = epoch
+    print('MAX epoch %d total test Accuracy = %.3f' %(max_epo, max_acc))
 
-	   #SAVE
-	   savefilename = args.savemodel+'finetune_'+str(epoch)+'.tar'
-	   torch.save({
-		    'epoch': epoch,
-		    'state_dict': model.state_dict(),
-		    'train_loss': total_train_loss/len(TrainImgLoader),
-		    'test_loss': total_test_loss/len(TestImgLoader)*100,
-		}, savefilename)
-	
-        print('full finetune time = %.2f HR' %((time.time() - start_full_time)/3600))
-	print(max_epo)
-	print(max_acc)
+    #SAVE
+    savefilename = args.savemodel+'finetune_'+str(epoch)+'.tar'
+    torch.save({
+            'epoch': epoch,
+            'state_dict': model.state_dict(),
+            'train_loss': total_train_loss/len(TrainImgLoader),
+            'Accuracy': total_test_loss/len(TestImgLoader)*100,
+        }, savefilename)
+    
+    print('full finetune time = %.2f HR' %((time.time() - start_full_time)/3600))
+    print(max_epo)
+    print(max_acc)
 
 
 if __name__ == '__main__':
